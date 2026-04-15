@@ -18,7 +18,7 @@ Initial_flag=0;     % Initializing a new project
 readBP_flag=0;      % Reading seismogram from .SAC files
 alignBP_flag=0;     % Hypocenter alignment
 runBPbmfm_flag=0;   % Beamforming Back-projection
-runBPmusic_flag=0;  % MUSIC Back-Projection
+runBPmusic_flag=1;  % MUSIC Back-Projection
 
 %% *** Set here the parameters to initialize the project and read the SAC files***
 project = 'Palu_2018';% name of the project, e.g. Tohoku_2011
