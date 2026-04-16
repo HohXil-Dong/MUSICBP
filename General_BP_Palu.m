@@ -51,7 +51,7 @@ ps=60;              % number of grids in longitude of the imaging domain
 latrange=[-2 0.5];  % latitude length of the imaging domain
 lonrange=[-0.5 0.5];% longitude length of the imaging domain
 Band=4;             % frequency band for the back-projection
-% Band=1 [0.05,0.25](Hz); Band=2 [0.25,1.0]; Band=3 [0.5,1]; Band=4 [0.5,2]; Band=5 [1,4]
+% Band=1 [0.1,0.25](Hz); Band=2 [0.25,1.0]; Band=3 [0.5,1]; Band=4 [0.5,2]; Band=5 [1,4]
 
 %% *** NO CHANGE BELOW THIS LINE ***
 workPath = './';
