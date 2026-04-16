@@ -1,18 +1,23 @@
-function initialize(root_address,workPath,project)
+function initialize_BP(root_address, workPath, project)
+%INITIALIZE_BP Create a project directory with the expected subfolders.
 
-% if ~exist(workPath)
-%     mkdir(workPath)
-% end
-% cd (workPath)
-if ~exist(project)
-    mkdir(project)
+% root_address is kept for backward compatibility with old callers.
+if nargin < 3
+    error('musicbp:initializeBP', 'initialize_BP requires workPath and project.');
 end
-mkdir(project)
-cd (project)
-mkdir Input
-mkdir Data
-mkdir Fig
-cd ..
-% command = ['cp ',root_address,'funcLib/libBP/General_BP.m ./'];
-% system(command);
+
+project = regexprep(project, '[\\/]+$', '');
+projectDir = fullfile(workPath, project);
+
+if ~isfolder(projectDir)
+    mkdir(projectDir);
+end
+
+subdirs = {'Input', 'Data', 'Fig'};
+for k = 1:3
+    targetDir = fullfile(projectDir, subdirs{k});
+    if ~isfolder(targetDir)
+        mkdir(targetDir);
+    end
+end
 end

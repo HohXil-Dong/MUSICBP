@@ -1,14 +1,25 @@
 # MUSICBP
 *Multi-taper MUSIC Back-projection Method for earthquake source imaging in Matlab.*
 
+The MUSICBP repository root now keeps only the tutorial examples, with two standalone entry scripts:
+
+- `General_BP_Palu.m`
+- `General_BP_Tohoku.m`
+
+The SEBP workflow is now organized independently under [`SEBP/SEBP.md`](SEBP/SEBP.md).
+
+Recent root-level changes are limited to engineering cleanup for the tutorial scripts: path resolution, project directory creation, `filelist` generation, and output-directory checks. These changes do not modify the numerical back-projection kernels or the intended imaging results of the MUSICBP tutorial examples.
+
 The Multiple Signal Classification (MUSIC) technique is a high-resolution technique designed to resolve closely spaced simultaneous sources. MUSIC enables back-projection imaging (BP) with superior resolution than the standard Beamforming techinque. MUSICBP is a tutorial code in Matlab that images the spatial-temporal evolution of high-frequency radiators (as a proxy of rupture front) for large earthquakes.
 
-Please follow the instruction below for the code usage
+Please follow the instructions below for tutorial usage.
 
-1.    Open “General_BP.m” program in the folder named MUSICBP, and set “Initial_flag” as 1, set the project name (e.g. Palu_2018) to initialize the program. Run “General_BP.m”. This step will creat a project folder "Palu_2018".
-2.    Enter your project folder "Palu_2018" and Copy all seismic data (ending with ‘.SAC’) that you’ve prepared for an earthquake into the “Data/” folder.
-3.    In program setting only the “readBP_flag” as 1 to read the earthquake data into matlab. Make sure you set up parameters such as hypocenter locations and magnitude (under  the parameters to initialize the project and read the SAC files) of the earthquake properly. As the code finish running, plots of waveforms and stations will pop out. Meanwhile, a “data0.mat” file should be created in the ”Input/” folder, containing waveform data and parameters.
-4.    In program setting the “alignBP_flag” as 1, and set the proper parameters under “Parameters for hypocenter alignment” part to align the waveform. We need to align the waveform several times to get the best alignment. See annotations after parameters for their meanings.
-(Tips for alignment: Every time before alignment, looking at the waveform and mark the indexs of records with favorable signal-to-noise ratio. Set the best station as reference station. You can check the comments and learn how the frequency and time window are set. The parameter ‘ts’ is the starting time of the window for the cross-correlation. Make sure the window always centers the P-arrival, i.e. let ‘ts’ equal to [P arriving time] - [0.5*window]. Try to preserve as much stations with higher cross-correlation coefficient as you can. A station distribution with higher density, larger range aperture, and larger azimuthal aperture should be favored to provide more reliable BP results. When “refSta” is 0, it means the stacked waveform will be used as the reference station.
-5.    Setting “runBPbmfm_flag” or “runBPmusic_flag” as 1 and set up parameters of the back-projection runner to perform the Beamforming BP or Multiple Signal Classification BP. This step produces the BP movies (movie.gif) and Summary plots (summary.pdf). The coordinates and power of the BP results are listed in “HFdots” (time, lat, lon, power) file.
+1.    Open `General_BP_Palu.m` or `General_BP_Tohoku.m` in the MUSICBP root directory and set `Initial_flag` as 1. Run the script to initialize the tutorial project folder.
+2.    Copy the seismic data (ending with `.SAC`) into the generated project `Data/` folder.
+3.    Set only `readBP_flag=1` to read the earthquake data into Matlab. As the code finishes, plots of waveforms and stations will pop out, and `data0.mat` will be created in the `Input/` folder.
+4.    Set `alignBP_flag=1` and tune the parameters under "Parameters for Hypocenter alignment" to align the waveform. Several alignment passes are usually needed to obtain the best result.
 
+Alignment tips:
+The parameter `ts` is the start time of the cross-correlation window. Keep the window centered on the P arrival, meaning `ts = [P arrival time] - [0.5 * window length]`. Try to preserve as many stations with high cross-correlation coefficients as possible. A station set with better density, aperture, and azimuthal coverage generally gives more reliable BP results. When `refSta = 0`, the stacked waveform is used as the reference trace.
+
+5.    Set `runBPbmfm_flag` or `runBPmusic_flag` as 1 and set up parameters of the back-projection runner to perform the Beamforming BP or Multiple Signal Classification BP. This step produces the BP movies (`movie.gif`) and summary plots (`summary.pdf`). The coordinates and power of the BP results are listed in the `HFdots` file.

@@ -29,10 +29,16 @@ load ptimes;
     ux=linspace(uxRange(1)+lat0,uxRange(2)+lat0,ps); % lat of grid points
     uy=linspace(uyRange(1)+lon0,uyRange(2)+lon0,qs); % lon of grid points
     
-    cd([path 'Input']);
+    inputDir = fullfile(path, 'Input');
+    if ~isfolder(inputDir)
+        error('musicbp:runteleBPbmfm', 'Missing Input directory: %s', inputDir);
+    end
+    cd(inputDir);
     fprintf dirname
     saveDir=[dirname '_bmfm_Dir'];
-    system(['mkdir ' saveDir]);
+    if ~isfolder(saveDir)
+        mkdir(saveDir);
+    end
     cd(saveDir);
     fileID=fopen('logfile','w');
     

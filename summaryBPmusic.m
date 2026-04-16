@@ -122,7 +122,7 @@ for j=1:length(t)
     imwrite(im,map,'movie.gif','DelayTime',0.5,'WriteMode','append') 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 end
-save movieBP;
+save('movieBP.mat','bux','buy','Power','nw','x1','y1','t','-v7.3');
 
 %% Write HFdots file
 Power = sqrt(Power); % the square root of amplitude
@@ -143,6 +143,9 @@ dep0=ret.dep0;
 h12=figure(2);
 set(h12, 'Position', [100, 100, 600, 600]);
 set(gcf, 'PaperPositionMode', 'auto') ;
+set(h12, 'PaperUnits', 'inches');
+set(h12, 'PaperPosition', [0 0 6 6]);
+set(h12, 'PaperSize', [6 6]);
 cmm=colormap;
 [ nmm, tmp0]=size(cmm);
 hold on;
@@ -150,9 +153,10 @@ c0=linspace(1,nmm,tend);
 r=interp1(1:nmm,cmm(:,1),c0);
 g=interp1(1:nmm,cmm(:,2),c0);
 b=interp1(1:nmm,cmm(:,3),c0);
-r1=interp1(1:tend,r,t);
-g1=interp1(1:tend,g,t);
-b1=interp1(1:tend,b,t);
+colorTime=max(1,min(tend,t));
+r1=interp1(1:tend,r,colorTime);
+g1=interp1(1:tend,g,colorTime);
+b1=interp1(1:tend,b,colorTime);
 
 
 kt=0;
@@ -199,19 +203,23 @@ xlabel('Longitude (^o)');
 ylabel('Latitude (^o)');
 title('Summary');
 box on;
-print('-dpdf','-r300','summary_BP.pdf'); 
+print(h12,'-dpdf','-r300','summary_BP.pdf'); 
 
     %% Plot Power-time
-     figure;plot(real(Power(:,1)) );
-    set(gcf, 'Position', [100, 100, 600, 600]);
-    set(gcf, 'PaperPositionMode', 'auto') ;
+     hPower=figure;
+     plot(real(Power(:,1)) );
+    set(hPower, 'Position', [100, 100, 600, 600]);
+    set(hPower, 'PaperPositionMode', 'auto') ;
+    set(hPower, 'PaperUnits', 'inches');
+    set(hPower, 'PaperPosition', [0 0 6 6]);
+    set(hPower, 'PaperSize', [6 6]);
     box on; 
     xlabel('Time (s)');
     ylabel('Normalized Power');
     title('Power vs time');
-    print('-dpdf','-r300','power_BP.pdf'); 
+    print(hPower,'-dpdf','-r300','power_BP.pdf'); 
     %% Plot distance vs time projection along strike
-    figure;
+    hNS=figure;
 epi_dis=distance22(bux(3,1),buy(3,1),bux(:,1),buy(:,1))*110.49;
 epi_az=azimuth(bux(3,1),buy(3,1),bux(:,1),buy(:,1));
 pjt_az=0;
@@ -223,8 +231,11 @@ pjt_pen_dis=-epi_dis.*sind(epi_az-pjt_az);
 
 %h12=figure(13);
 hold on;
-set(gcf, 'Position', [100, 100, 600, 600]);
-set(gcf, 'PaperPositionMode', 'auto') ;
+set(hNS, 'Position', [100, 100, 600, 600]);
+set(hNS, 'PaperPositionMode', 'auto') ;
+set(hNS, 'PaperUnits', 'inches');
+set(hNS, 'PaperPosition', [0 0 6 6]);
+set(hNS, 'PaperSize', [6 6]);
 
 % az0=40;az1=160;
 % N=180;
@@ -249,14 +260,17 @@ xlabel('Distance (km)');
 ylabel('Time (s)');
 title('Distance along N-S direction')
 box on;
-print('-dpdf','-r300','dis_NS_BP.pdf'); 
+print(hNS,'-dpdf','-r300','dis_NS_BP.pdf'); 
 
 
-figure;
+hEpi=figure;
 
 hold on;
-set(gcf, 'Position', [100, 100, 600, 600]);
-set(gcf, 'PaperPositionMode', 'auto') ;
+set(hEpi, 'Position', [100, 100, 600, 600]);
+set(hEpi, 'PaperPositionMode', 'auto') ;
+set(hEpi, 'PaperUnits', 'inches');
+set(hEpi, 'PaperPosition', [0 0 6 6]);
+set(hEpi, 'PaperSize', [6 6]);
 for j=1:length(t)
     kt=kt+1;
     for jj=1:1
@@ -271,4 +285,4 @@ xlabel('Distance (km)');
 ylabel('Time (s)');
 box on;
 title('Distance to mainshock epicenter')
-print('-dpdf','-r300','dis_epi_BP.pdf');
+print(hEpi,'-dpdf','-r300','dis_epi_BP.pdf');

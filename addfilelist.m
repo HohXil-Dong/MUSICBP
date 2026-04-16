@@ -1,24 +1,27 @@
-function addfilelist(path)     %add all *.SAC.r files' names to the filelist
+function addfilelist(path)
+%ADDFILELIST Write all SAC file names in path/Data to a filelist.
 
-%cd(path)
-d=dir([ path '/Data/*.SAC*']);
-% i=size(d)
-% filelist=""
-
-% for j=1:1:size(d)
-%     
-%     filelist(j)=string(d(j).name);
-% 
-% end
-
-fid = fopen([path '/Data/filelist'],'wt');
-for i=1:size(d)
-    fprintf(fid,'%s\n',d(i).name);
+dataDir = fullfile(path, 'Data');
+if ~isfolder(dataDir)
+    error('musicbp:addfilelist', 'Missing Data directory: %s', dataDir);
 end
-% filelist=filelist(2:end)
-% fid = fopen('filelist','wt');
-% fprintf(fid,'%s\n',filelist); 
-fclose(fid);
 
-% copyfile('filelist', 'Data');
+entries = dir(fullfile(dataDir, '*.SAC*'));
+entries = entries(~[entries.isdir]);
+if isempty(entries)
+    error('musicbp:addfilelist', 'No SAC files found in %s', dataDir);
+end
+
+[~, order] = sort({entries.name});
+entries = entries(order);
+
+fid = fopen(fullfile(dataDir, 'filelist'), 'wt');
+if fid < 0
+    error('musicbp:addfilelist', 'Unable to write filelist in %s', dataDir);
+end
+cleanupObj = onCleanup(@() fclose(fid));
+for i = 1:numel(entries)
+    fprintf(fid, '%s\n', entries(i).name);
+end
+clear cleanupObj
 end
