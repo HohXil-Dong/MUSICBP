@@ -8,21 +8,21 @@
 %                AIN        take-off angle
 %                AZM        azimuth angle
 %
-% NOTE                All angles are in degrees. 
+% NOTE                All angles are in degrees.
 %                Definitions follow usual seismological conventions.
 %                The inputs can be vectors of same length N.
 %
 % OUTPUTS        U        radiation pattern, size = [N,3]
 %                        U(:,1) = P
-%                        U(:,2) = SV 
+%                        U(:,2) = SV
 %                        U(:,3) = SH
 %
 function U = RadiationPattern(A,B,C,D,E,R)
 
 rad = pi/180;
-A = A(:)*rad;        % strike (phi_f)         
+A = A(:)*rad;        % strike (phi_f)
 B = B(:)*rad;        % dip (delta)
-C = C(:)*rad;         % rake (lambda) 
+C = C(:)*rad;         % rake (lambda)
 D = D(:)*rad;        % AIN
 E = E(:)*rad;        % AZM
 

@@ -1,19 +1,22 @@
-function filename = setparBP(path, inputband, Band, lon0, lat0, dep, parr, over, ps, qs, lonrange, latrange)
+function filename = setparBP(path, inputband, Band, lon0, lat0, dep, parr, over, ps, qs, lonrange, latrange, win)
 % setparBP set parameters for runteleBP/runteleBPmusic/runteleBPmusicCali
-%   
+%
 %   explaination of the inputs:
-%   	path:     	the working address of current project or event, 
+%   	path:     	the working address of current project or event,
 %                       e.g. /home/USER/BackProjection/Mexico2017.
-%    	Band:           
+%    	Band:
 %     	ts11:     	P arrival time since the straight one (records)
 %                       i.e. how long the data start before P-arrival time
-%     	refst:   	
-%       cutoff:     
+%     	refst:
+%       cutoff:
 %       plotscale:  scaling of the amplitudes of seismograms
-%   
+%
 
 %   Copyright 2013-2017 Han Bao & Lingsen Meng's group, UCLA.
 
+if nargin < 13 || isempty(win)
+    win = 10;
+end
 
 fileinput = strcat(path, 'Input/data', num2str(inputband));
 
@@ -30,12 +33,11 @@ ret.qs = qs;
 ret.lonrange = lonrange;
 ret.latrange = latrange;
 % frequency
-[fl, fh] = band_select(Band);
+[fl, fh] = band_select(Band, true);
 ret.fl = fl;
 ret.fh = fh;
 ret.fs = 2;
-ret.win = 10;
-% fl 0.5 fh 2 win 10
+ret.win = win;
 ret.dirname = strcat('Par', num2str(fl), '_', num2str(fh), '_', num2str(ret.win));
 ret.Nw = 0.5;
 filename = strcat(path, 'Input/', ret.dirname, '.mat');

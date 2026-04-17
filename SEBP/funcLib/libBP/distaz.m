@@ -11,12 +11,12 @@ function [dk,dd,daze,dazs]=distaz (sta,sto,epa,epo)
         cea = cos(ea);
         ces = cos(eo-so);
         ses = sin(eo-so);
-        
+
         if  (sa==ea)
            if (sto==epo)
               	dk =0.00;
-					dd =0.00;
-	  				daze=0.0;
+                    dd =0.00;
+      				daze=0.0;
                dazs=0.0;
                  return
   end
@@ -25,23 +25,23 @@ end
 if sta==90.
    if epa==90.0
      dk =0.00;
-	  dd =0.00;
-	  daze=0.00;
+      dd =0.00;
+      daze=0.00;
      dazs=0.00;
      return
   end
 end
 
-      
-      
+
+
 if sta==-90.0
    if epa==-90.0
-	  dk =0.00;
-	  dd =0.00;
-	  daze=0.00;
-	  dazs=0.00;
-	  return
-	end
+      dk =0.00;
+      dd =0.00;
+      daze=0.00;
+      dazs=0.00;
+      return
+    end
 end
         dd = ssa*sea+csa*cea*ces;
         if dd~=0. , dd=atan(sqrt(1.0-dd*dd)/dd); end

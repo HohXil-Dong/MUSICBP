@@ -1,5 +1,5 @@
 % Comment *****
-% 
+%
 clear
 close all;
 address='/home/liuwei/Workflow/BP2/Workshop2019/';            % address of paths that need to be added below
@@ -62,7 +62,7 @@ latrange=[-3 3];        % latitudinal range
 lonrange=[-3 3];        % longitudinal range
     %%% Band choice
     Band=4;             % frequency choice for setparBP/runteleBP
-                        % for details, look at function 'band_select.m' 
+                        % for details, look at function 'band_select.m'
     	% Band=1 [0.05,0.25]; Band=2 [0.25,1.0]; Band=3 [0.5,1]
     	% Band=4 [0.5,2]    ; Band=5 [1,4]
 
@@ -75,7 +75,7 @@ if Initial_flag==1
     initialize_BP(address,workPath,strcat(project,'/'));
 end
 if readBP_flag==1
-	fprintf('Run readBP\n');
+    fprintf('Run readBP\n');
     Preshift=false; % no change!
     addfilelist(path)
     readteleBP(path,lon0,lat0,sr,ori,display,Preshift,plotscale,strike1,strike2,Mw)

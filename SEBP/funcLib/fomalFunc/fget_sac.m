@@ -3,7 +3,7 @@ function [t,data,SAChdr] = fget_sac(filename)
 
 %[t,data,SAChdr] = fget_sac(filename)
 
-% read sac into matlab 
+% read sac into matlab
 % written by Zhigang Peng
 % program called
 % [head1, head2, head3, data]=sac(filename);

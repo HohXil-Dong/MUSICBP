@@ -1,4 +1,4 @@
-function musicbp_require(target, targetType, label, hint)
+function musicbp_require(target, targetType, label, hint, logFile)
 %MUSICBP_REQUIRE Assert that a file or directory exists.
 
 if nargin < 3 || isempty(label)
@@ -6,6 +6,9 @@ if nargin < 3 || isempty(label)
 end
 if nargin < 4
     hint = '';
+end
+if nargin < 5
+    logFile = '';
 end
 
 switch lower(targetType)
@@ -25,5 +28,6 @@ message = sprintf('Missing %s: %s', label, target);
 if ~isempty(hint)
     message = sprintf('%s\n%s', message, hint);
 end
+musicbp_log(logFile, 'ERROR', '%s', message);
 error('musicbp:missingTarget', '%s', message);
 end

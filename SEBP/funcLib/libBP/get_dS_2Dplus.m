@@ -32,7 +32,7 @@ n_evt = length(lat_ca);     % number of aftershocks
         sd(i,:)=sd2(i,:)-sd1(i,:);
     end
 
-%% Build the Matrix D[ddt(n_evt*n_sta,1)] and G[dX(n_evt*n_sta,n_sta*3)].   
+%% Build the Matrix D[ddt(n_evt*n_sta,1)] and G[dX(n_evt*n_sta,n_sta*3)].
 %%% where M[ds(n_sta*3,1)] = D\G, or D=G*M.     M is slowness error matrix
     D=zeros(n_evt*n_sta,1);      % matrix of dt
     G=zeros(n_evt*n_sta,n_sta*3);   % make up matrix G(M*n_sta+1,n_sta+1)=0, operator matrix
@@ -40,14 +40,14 @@ n_evt = length(lat_ca);     % number of aftershocks
     for i=1:n_evt
         for j=1:n_sta
             D( (i-1)*n_sta+j,    1    	) 	= sd(i,j) - sd(i,ref);
-            
+
             G( (i-1)*n_sta+j,    3*j-2	)   = 1;
             G( (i-1)*n_sta+j,    3*j-1	)   = dx(i);
             G( (i-1)*n_sta+j,    3*j  	)   = dy(i);
         end
     end
 
-%% calculate the Matrix M( n_sta*3,1  ) 
+%% calculate the Matrix M( n_sta*3,1  )
     M = G\D;      % Least Squares to solve  M
 %     dSxy=M(1:3*n_sta);
     dS0=M(1:3:3*n_sta-2);

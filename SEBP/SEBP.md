@@ -1,227 +1,293 @@
-# SEBP 运行说明
+# SEBP Overview And Workflow
 
-## 1. 当前结构
-`SEBP` 已重组为独立工作流，所有主控脚本、配置和数据目录都放在 `SEBP` 根目录下。
+## 1. What SEBP Is
+`SEBP` is a standalone workflow reorganized from the tutorial-style `MUSICBP` implementation in the repository root. It is used for:
 
-一级结构如下：
+- standard MUSIC / BMFM back-projection of the 2021 Maduo mainshock
+- aftershock-based slowness correction
+- slowness-enhanced back-projection of both aftershocks and the mainshock
 
-- `SEBP/common`：配置与工程辅助函数
-- `SEBP/funcLib`：BP/MUSIC 与相关依赖函数库
-- `SEBP/mainshock`：主震目录，包含 `Data/Input/Fig`
-- `SEBP/<event_name>`：每个余震目录，例如 `SEBP/af04_M51`
-- `SEBP/SEBP_step1.m` 到 `SEBP/SEBP_step5.m`
-- `SEBP/create_ev.m`
-- `SEBP/create_ca.m`
+The main public entry points are:
 
-默认只保留 `maduo_2021` 配置，配置入口为：
+- `SEBP_step1.m`: mainshock standard MUSIC / BMFM BP
+- `SEBP_step2.m`: aftershock SAC reading, station matching, and mainshock `timeshift` transfer
+- `SEBP_step3.m`: aftershock MUSIC BP
+- `SEBP_step4.m`: aftershock slowness-term inversion and regenerated calibrated aftershock results
+- `SEBP_step5.m`: application of the same slowness terms back to the mainshock
+- `create_ev.m`: aftershock event list maintenance
+- `create_ca.m`: aftershock apparent / catalog location maintenance
+
+The only configuration entry point is:
 
 - `SEBP/common/musicbp_config.m`
 
-## 2. 新入口对应关系
-当前 SEBP 入口固定为：
+The currently supported profile is:
 
-- `SEBP_step1.m`：主震读取、对齐、MUSIC/BMFM BP
-- `SEBP_step2.m`：读取余震并匹配主震台站/迁移 `timeshift`
-- `SEBP_step3.m`：运行余震 MUSIC BP
-- `SEBP_step4.m`：使用 `ca_ap_loc.mat` 校正余震
-- `SEBP_step5.m`：使用同一套慢度项校正主震
+- `maduo_2021`
 
-人工步骤脚本保留原名：
+## 2. Relation To `SEBP_v0`
+The current `SEBP` combines the two historical parts of `SEBP_v0` into one standalone workflow:
 
-- `create_ev.m`
-- `create_ca.m`
+- `SEBP_v0/AU_workshop`: standard mainshock MUSIC BP workflow
+- `SEBP_v0/Calibrate`: aftershock matching, aftershock correction, and mainshock recalibration workflow
 
-## 3. 目录约定
-主震目录固定为：
+Script mapping:
+
+| `SEBP_v0` | Current `SEBP` |
+| --- | --- |
+| `SEBP_v0/AU_workshop/General_BP.m` | `SEBP/SEBP_step1.m` |
+| `SEBP_v0/Calibrate/AU102_Auto_read_and_match.m` | `SEBP/SEBP_step2.m` |
+| `SEBP_v0/Calibrate/AU103_Auto_run_music.m` | `SEBP/SEBP_step3.m` |
+| `SEBP_v0/Calibrate/AU104_Auto_cali_music.m` | `SEBP/SEBP_step4.m` |
+| `SEBP_v0/Calibrate/AU105_Main_cali_music.m` | `SEBP/SEBP_step5.m` |
+| `SEBP_v0/Calibrate/create_ev.m` | `SEBP/create_ev.m` |
+| `SEBP_v0/Calibrate/create_ca.m` | `SEBP/create_ca.m` |
+
+This correspondence is workflow-level only. It does not claim point-by-point numerical identity unless separately verified.
+
+## 3. Engineering Changes Relative To `SEBP_v0`
+
+### 3.1 Single-root standalone layout
+The old split between `AU_workshop` and `Calibrate` has been reorganized into one `SEBP/` root directory.
+
+Top-level structure:
+
+- `SEBP/common`: configuration and workflow helpers
+- `SEBP/funcLib`: BP / MUSIC dependency library
+- `SEBP/mainshock`: mainshock working directory
+- `SEBP/<event_name>`: aftershock working directories such as `SEBP/af04_M51`
+- `SEBP/SEBP_step1.m` to `SEBP/SEBP_step5.m`
+
+### 3.2 Explicit step scripts
+Historical controller names such as `General_BP.m` and `AU102_Auto_read_and_match.m` were replaced by `SEBP_step1.m` to `SEBP_step5.m`. This makes the execution order explicit without changing the scientific workflow.
+
+### 3.3 Path cleanup
+Hard-coded absolute paths from `SEBP_v0` were replaced by:
+
+- `fileparts(mfilename('fullpath'))`
+- `fullfile(...)`
+- centralized configuration from `musicbp_config('maduo_2021')`
+
+Each step now initializes its own path context. No separate startup script is required before running `SEBP_step1.m` to `SEBP_step5.m`.
+
+### 3.4 Centralized configuration
+Event parameters, alignment settings, BP parameters, and key file paths are now managed in:
+
+- `SEBP/common/musicbp_config.m`
+
+This file defines:
+
+- mainshock working directories
+- read / alignment / BP parameters
+- aftershock BP parameters
+- paths to `evtlst.mat`, `ca_ap_loc.mat`, `Ptimesdepth.mat`, and related files
+- the reference station index
+
+### 3.5 Helper functions for workflow robustness
+Current engineering helpers include:
+
+- `musicbp_require.m`: explicit file / directory checks with clear errors
+- `musicbp_log.m`: step-level logging
+- `musicbp_prepare_data_dir.m`: `Data` directory validation and `filelist` generation
+- `musicbp_step_setup.m`: common path setup, configuration loading, and step log initialization
+
+### 3.6 Cleaner logging and terminal output
+The workflow now separates:
+
+- concise terminal summaries for step-level progress
+- detailed logs in `SEBP/SEBP_step1.log` to `SEBP/SEBP_step5.log`
+
+This is an engineering change only. It does not imply any change to the BP / MUSIC / slowness-correction formulas.
+
+### 3.7 Fixed directory convention
+The standalone workflow consistently uses:
+
+- `Data`: raw waveform inputs
+- `Input`: intermediate data, parameter files, BP result directories
+- `Fig`: generated figures and image products
+
+For the mainshock:
 
 - `SEBP/mainshock/Data`
 - `SEBP/mainshock/Input`
 - `SEBP/mainshock/Fig`
 
-余震目录固定为：
+For each aftershock:
 
-- `SEBP/af04_M51/Data`
-- `SEBP/af04_M51/Input`
-- `SEBP/af04_M51/Fig`
+- `SEBP/<event>/Data`
+- `SEBP/<event>/Input`
+- `SEBP/<event>/Fig`
 
-其他余震按相同方式平铺在 `SEBP` 根目录下。
+### 3.8 Manual interpretation is still preserved
+The engineering refactor does not replace the original manual interpretation steps. Important manual actions still include:
 
-默认玛多配置中的关键文件：
+- checking `alignpara` suggestions before updating `align`
+- manually preparing apparent / catalog aftershock locations for `create_ca.m`
 
-- 主震 BP 参数文件：`SEBP/mainshock/Input/Par0.5_2_10.mat`
-- 主震校正参数文件：`SEBP/mainshock/Input/Par0.5_2_10_cali.mat`
-- 余震列表：`SEBP/evtlst.mat`
-- 余震 apparent/catalog 位置：`SEBP/ca_ap_loc.mat`
-- 走时表：`SEBP/funcLib/libBP/Ptimesdepth.mat`
+## 4. Scientific Workflow That Remains The Same
+At the workflow level, the current implementation still follows the same sequence as the original method chain:
 
-## 4. 主震流程
-主震入口脚本：
+1. standard mainshock MUSIC BP
+2. aftershock SAC reading and mainshock station matching
+3. transfer of mainshock `timeshift` to aftershocks
+4. aftershock MUSIC BP and apparent-location extraction
+5. inversion of slowness terms from apparent / catalog aftershock locations
+6. regeneration of calibrated aftershock and mainshock results using the same slowness terms
 
-- `SEBP/SEBP_step1.m`
+This statement is limited to workflow structure. It does not claim any unverified change in formulas, travel-time handling, station ordering, or correction logic.
 
-常用步骤如下：
+Scientifically sensitive parts still include:
 
-1. 如需创建 `mainshock/Input`、`mainshock/Data`、`mainshock/Fig`，设置 `Initial_flag=1`
-2. 将主震 SAC 数据放入 `SEBP/mainshock/Data`
-3. 设置 `readBP_flag=1`，自动生成 `filelist`，并输出 `SEBP/mainshock/Input/data0.mat`
-4. 手动设置 `Band_for_align`
-5. 如需参考自动建议，先设置 `alignpara_flag=1`。  
-   `Band_for_align=1` 时读取 `data0.mat`；更高频带时读取上一轮的 `data(Band_for_align-1).mat`，并打印建议的 `ts11/refst`
-6. 根据 `alignpara_flag` 的输出，手动修改 `align` 数组中的 `ts11/refst/cutoff`
-7. 设置 `alignBP_flag=1`，只对当前 `Band_for_align` 执行一轮手动对齐，并生成对应的 `data1.mat`、`data2.mat` 等
-8. 完成所需对齐轮次后，再设置 `runBPmusic_flag=1` 或 `runBPbmfm_flag=1`，输出 `Par*.mat` 和对应的结果目录
+- waveform alignment
+- `timeshift` transfer
+- apparent / catalog location preparation
+- `get_dS_2Dplus` and related slowness-term estimation
+- BP parameter selection
 
-`SEBP_step1.m` 会把详细运行信息追加写入：
+## 5. Current Key Paths
 
-- `SEBP/mainshock/Input/SEBP_step1.log`
+- configuration: `SEBP/common/musicbp_config.m`
+- mainshock directory: `SEBP/mainshock`
+- aftershock list: `SEBP/evtlst.mat`
+- aftershock apparent / catalog locations: `SEBP/ca_ap_loc.mat`
+- travel-time table: `SEBP/funcLib/libBP/Ptimesdepth.mat`
+- step logs: `SEBP/SEBP_step1.log` to `SEBP/SEBP_step5.log`
 
-终端只保留高层摘要；逐台站读入、`alignpara` 推荐值、每轮对齐的 cut 台站列表和 BP 输出目录写入该日志文件。
+Under the default Maduo profile, typical parameter files are:
 
-主震阶段关键输出：
+- `SEBP/mainshock/Input/Par0.5_2_10.mat`
+- `SEBP/mainshock/Input/Par0.5_2_10_cali.mat`
+- `SEBP/<event>/Input/data5.mat`
+- `SEBP/<event>/Input/Par0.5_2_10.mat`
+- `SEBP/<event>/Input/Par0.5_2_10_cali.mat`
 
-- `data0.mat`
-- `dataN.mat`
-- `Par*.mat`
-- `*_MUSIC_Dir`
-- `*_bmfm_Dir`
+## 6. Current Execution Order
 
-## 5. 余震与校正流程
-### 5.1 生成余震列表
-在 `SEBP` 根目录下维护余震目录，例如：
+### 6.1 Load configuration
+From the `SEBP` root in MATLAB:
+
+```matlab
+cfg = musicbp_config('maduo_2021');
+```
+
+Running `SEBP_step1.m` to `SEBP_step5.m` directly is also fine. Each step now initializes its own path context automatically.
+
+### 6.2 Mainshock BP: `SEBP_step1.m`
+Typical order:
+
+1. put mainshock SAC files in `SEBP/mainshock/Data`
+2. set `readBP_flag=1` to generate `filelist` and `data0.mat`
+3. choose `Band_for_align`
+4. set `alignpara_flag=1` if suggestions are needed
+5. manually update `align` values if needed
+6. set `alignBP_flag=1` for the chosen manual alignment pass
+7. run `runBPmusic_flag=1` or `runBPbmfm_flag=1` after the required alignment passes are complete
+
+Detailed engineering logs are written to:
+
+- `SEBP/SEBP_step1.log`
+
+### 6.3 Maintain aftershock list: `create_ev.m`
+Keep aftershock event directories such as:
 
 - `SEBP/af04_M51`
 - `SEBP/af06_M52`
 - `SEBP/af08_M52`
 
-每个目录下应放置对应余震的 `Data/`。
+Each one should contain its own `Data/` directory. Then run:
 
-运行：
+```matlab
+create_ev
+```
 
-- `SEBP/create_ev.m`
-
-输出：
+This generates:
 
 - `SEBP/evtlst.mat`
 
-### 5.2 匹配主震台站与时间校正
-运行：
+### 6.4 Aftershock reading and `timeshift` transfer: `SEBP_step2.m`
 
-- `SEBP/SEBP_step2.m`
+```matlab
+SEBP_step2
+```
 
-输出：
+This step:
 
-- `SEBP/<event>/Input/data5.mat`
+- reads aftershock SAC files
+- matches stations against the mainshock result
+- transfers the aligned mainshock `timeshift`
+- writes `Input/data5.mat` for each aftershock
 
-### 5.3 运行余震 MUSIC BP
-运行：
+### 6.5 Aftershock MUSIC BP: `SEBP_step3.m`
 
-- `SEBP/SEBP_step3.m`
+```matlab
+SEBP_step3
+```
 
-输出：
+This step runs MUSIC BP for each aftershock using `data5.mat` and generates the corresponding parameter files and result directories.
 
-- `SEBP/<event>/Input/Par0.5_2_10.mat`
-- `SEBP/<event>/Input/Par0.5_2_10_MUSIC_Dir/`
+### 6.6 Manual apparent / catalog location preparation: `create_ca.m`
+This step remains manual. A typical workflow is:
 
-### 5.4 人工整理余震 apparent 位置
-对每个余震：
+1. inspect the corresponding `movieBP.mat`
+2. choose the imaged time interval based on `Power`
+3. read the apparent location from that interval
+4. enter both apparent and catalog locations in `create_ca.m`
 
-1. 打开对应 `movieBP.mat`
-2. 根据 `Power` 判读显像时间窗
-3. 读取该时间窗内 `bux` / `buy` 的均值
-4. 将 apparent 与 catalog 位置填入 `SEBP/create_ca.m`
+Then run:
 
-运行：
+```matlab
+create_ca
+```
 
-- `SEBP/create_ca.m`
-
-输出：
+This generates:
 
 - `SEBP/ca_ap_loc.mat`
 
-### 5.5 校正余震
-运行：
-
-- `SEBP/SEBP_step4.m`
-
-输出：
-
-- `SEBP/<event>/Input/Par0.5_2_10_cali.mat`
-- `SEBP/<event>/Input/Par0.5_2_10_music_Cali2Dplus_Dir/`
-
-### 5.6 校正主震
-运行：
-
-- `SEBP/SEBP_step5.m`
-
-输出：
-
-- `SEBP/mainshock/Input/Par0.5_2_10_cali.mat`
-- `SEBP/mainshock/Input/Par0.5_2_10_music_Cali2Dplus_Dir/`
-
-## 6. 常见问题
-### 缺少目录或文件
-优先检查：
-
-- `SEBP/mainshock/Data` 是否有主震 SAC
-- `SEBP/<event>/Data` 是否有余震 SAC
-- `SEBP/evtlst.mat` 是否已生成
-- `SEBP/ca_ap_loc.mat` 是否已生成
-- `SEBP/mainshock/Input/Par*.mat` 是否已由 `SEBP_step1.m` 生成
-
-### 找不到 `Par0.5_2_10.mat`
-当前默认玛多配置仍会生成这个基名。如果修改了 `SEBP/common/musicbp_config.m` 中的频带或窗口，需要重新运行上游步骤生成新的 `Par*.mat`。
-
-### 找不到 `Ptimesdepth.mat`
-检查：
-
-- `SEBP/funcLib/libBP/Ptimesdepth.mat`
-
-### 没有匹配台站
-说明某个余震与主震读入后的台站集合没有交集。优先检查：
-
-- 余震台站是否与主震来自同一阵列
-- SAC 命名和台站代码是否一致
-- 是否误删数据
-
-## 7. 最小测试流程
-建议按下面顺序验证：
-
-1. 在 MATLAB 中切到 `SEBP` 根目录
-2. 运行 `startup_sebp`
-3. 运行 `cfg = musicbp_config('maduo_2021');`
-4. 检查 `cfg.active.mainshock_dir` 是否指向 `SEBP/mainshock`
-5. 运行 `SEBP_step1.m` 的 `readBP_flag=1`
-6. 在 `SEBP_step1.m` 中手动设置 `Band_for_align=1`，按需运行 `alignpara_flag=1` 和 `alignBP_flag=1`
-7. 将 `Band_for_align` 依次改为 `2`、`3`、`4`，重复手动对齐流程
-8. 运行 `SEBP_step1.m` 的 `runBPmusic_flag=1`
-9. 运行 `create_ev.m`
-10. 运行 `SEBP_step2.m`
-11. 运行 `SEBP_step3.m`
-12. 完成人工整理后运行 `create_ca.m`
-13. 运行 `SEBP_step4.m`
-14. 运行 `SEBP_step5.m`
-
-如果第 1 步到第 8 步都能在新目录结构下正常生成文件，说明主震流程迁移已经成功。
-
-如果你不能在 MATLAB 图形界面里使用 `Set Path`，不影响运行。直接在命令行执行：
+### 6.7 Aftershock slowness correction: `SEBP_step4.m`
 
 ```matlab
-cd /path/to/MUSICBP/SEBP
-startup_sebp
-cfg = musicbp_config('maduo_2021');
+SEBP_step4
 ```
 
-## 8. 修改到其他事件时优先改哪里
-如果后续切换到其他事件，优先修改：
+This step:
+
+- reads `ca_ap_loc.mat`
+- estimates slowness terms from apparent / catalog aftershock locations
+- generates calibrated parameter files and calibrated result directories for each aftershock
+
+### 6.8 Mainshock recalibration: `SEBP_step5.m`
+
+```matlab
+SEBP_step5
+```
+
+This step applies the same slowness terms estimated from aftershocks back to the mainshock result.
+
+## 7. Current Scope And Limits
+
+- only the `maduo_2021` profile is currently supported
+- `SEBP_v0/` is the comparison baseline used in this repository
+- the documentation describes the current code state only
+- engineering cleanup is not presented as an algorithmic upgrade
+
+If this workflow is migrated to another event, the recommended first edit point is:
 
 - `SEBP/common/musicbp_config.m`
 
-重点字段包括：
+rather than rewriting absolute paths inside `SEBP_step1.m` to `SEBP_step5.m`.
 
-- 主震目录和主震参数
-- 对齐频带与窗口参数
-- 主震 BP 和余震 BP 的频带、网格、时窗参数
-- `ref_station`
-- `max_events`
+## 8. References
+Relevant papers and background material are stored under `Paper/` at the repository root.
 
-不建议再直接在 `SEBP_step1-5.m` 中硬改绝对路径。
+- `Paper/MUSICBP.pdf`
+  - background for standard mainshock MUSIC back-projection
+- `Paper/SEBP.pdf`
+  - background for slowness-enhanced back-projection
+- `Paper/Zhang et al. - 2023 - Understanding and Mitigating the Spatial Bias of Earthquake Source Imaging With Regional Slowness En.pdf`
+  - background on spatial bias and regional slowness enhancement
+- `Paper/Xu et al. - 2023 - Understanding the Rupture Kinematics and Slip Model of the 2021 Mw 7.4 Maduo Earthquake A Bilateral.pdf`
+  - Maduo event application background
+- `Paper/Bao_NatGeo2019.pdf`
+- `Paper/Meng et al. - Improving back projection imaging with a novel physics-based aftershock calibration approach A case.pdf`
+
+These references are useful for understanding the method and the application context. The implementation details in the current repository should still be interpreted from the actual scripts and configuration under `SEBP/`.

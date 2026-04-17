@@ -13,7 +13,7 @@ function [p,S] = polyfit0(x,y,n)
 %
 %   The structure S contains the Cholesky factor of the Vandermonde
 %   matrix (R), the degrees of freedom (df), and the norm of the
-%   residuals (normr) as fields.   
+%   residuals (normr) as fields.
 %
 %   See also POLY, POLYVAL, ROOTS.
 
@@ -30,7 +30,7 @@ function [p,S] = polyfit0(x,y,n)
 %    y = [x  x  x  ] [p3
 %                      p2
 %                      p1]
-%                      
+%
 %
 % where the vector p contains the coefficients to be found.  For a
 % 7th order polynomial, matrix V would be:

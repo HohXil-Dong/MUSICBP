@@ -1,3 +1,5 @@
-function addfilelist(path)     %add all *.SAC.r files' names to the filelist
-musicbp_write_filelist(fullfile(path, 'Data'), '*.SAC*');
+function addfilelist(path)
+%ADDFILELIST Rebuild the SAC filelist in the event Data directory.
+
+musicbp_prepare_data_dir(fullfile(path, 'Data'), '', '*.SAC*');
 end

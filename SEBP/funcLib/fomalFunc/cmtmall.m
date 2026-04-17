@@ -27,13 +27,13 @@
  %
  %   CMTM(...) without output arguments plots the magnitude-squared
  %   and phase of the coherence (in two subplots) in the current figure.
- 
+
  %%%%% Debugging test code:
  % Fs = 100;
  % t = 0:1/Fs:(32-1/Fs);
  % X = sin(2*pi*5*t);  Y = sin(2*pi*5*t) + 0.2*randn(size(X));
  % cmtm(X,Y,4,Fs);
- 
+
  %%%%%%%%%%%%%%%%%%%%%%%%%%%% Check Inputs %%%%%%%%%%%%%%%%%%%%%%%%%%%%
   if (nargin < 2), error('Three arguments are required.');  end
  P = 2*NW;
@@ -51,7 +51,7 @@
 % 	E(1:tm)=cos(linspace(pi,2*pi,tm));
 % 	E(end-tm+1:end)=cos(linspace(0,pi,tm));
 %     E=(E+1)/2;
-% 
+%
 % end
 
 if P==1
@@ -61,15 +61,15 @@ end
 %  figure(11);
 %  plot(E);
  E = E';
- 
+
  %%%%%%%%%%%%%%%%%%%%%%%%%% Calculate Coherence %%%%%%%%%%%%%%%%%%%%%%%
 
  for i=1:m
   X(i,:)=X(i,:)-mean(X(i,:));
-  
-  Xf(:,:,i) = fft(E .* repmat(X(i,:),P,1),[],2);  
-%   Xf = Xf(:,1:midway);   
-  Pxx(:,:,i) = conj(Xf(:,:,i)).*Xf(:,:,i); 
+
+  Xf(:,:,i) = fft(E .* repmat(X(i,:),P,1),[],2);
+%   Xf = Xf(:,1:midway);
+  Pxx(:,:,i) = conj(Xf(:,:,i)).*Xf(:,:,i);
  end
 %  disp('x')
 %  X(1,1:5)
@@ -89,6 +89,6 @@ end
      end
  end
 %  Cxy = mean(Cxy,1);
-%  
- 
+%
+
  end

@@ -18,14 +18,14 @@ load data0.mat
     rake   = -177;
     model=prem('depth',dep0);
 
-%% Calculate    
+%% Calculate
     for j=1:length(ret.lat)
         P = tauptime('mod','prem','dep',dep0,'ph','P,pP','sta',[ret.lat(j) ret.lon(j)],'evt',[lat0, lon0]);
         p_takeoff(j)=rayp2inc(P(1).rayparameter,model.vp,6371-dep0);
         pP_takeoff(j)=180-rayp2inc(P(2).rayparameter,model.vp,6371-dep0);
         azi(j) = azimuth(lat0,lon0,ret.lat(j),ret.lon(j));
     end
-    
+
      U = RadiationPattern(strike,dip,rake,p_takeoff(:)',azi(:)');
      p_rad(:)=U(:,1)';
      U = RadiationPattern(strike,dip,rake,pP_takeoff(:)',azi(:)');

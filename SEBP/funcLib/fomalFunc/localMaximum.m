@@ -10,22 +10,22 @@ function varargout = localMaximum(x,minDist, exculdeEqualPoints)
 % dimensions
 %
 % exculdeEqualPoints - is a boolean definning either to recognize points with the same value as peaks or not
-% x = [1     2     3     4     4     4     4     4     4     3     3     3     2     1];  
+% x = [1     2     3     4     4     4     4     4     4     3     3     3     2     1];
 %  will the program return all the '4' as peaks or not -  defined by the 'exculdeEqualPoints'
 % localMaximum(x,3)
-% ans = 
+% ans =
 %      4     5     6     7     8     9    11    12
 %
 %  localMaximum(x,3,true)
 % ans =
 %      4     7    12
-%      
+%
 %
 % Example:
 % a = randn(100,30,10);
 % minDist = [10 3 5];
 % peaks = localMaximum(a,minDist);
-% 
+%
 % To recieve the subscript instead of the index use:
 % [xIn yIn zIn] = localMaximum(a,minDist);
 %
@@ -36,20 +36,20 @@ function varargout = localMaximum(x,minDist, exculdeEqualPoints)
         exculdeEqualPoints = false;
         if nargin < 2
             minDist = size(x)/10;
-        end       
+        end
     end
-    
+
     if isempty(minDist)
         minDist = size(x)/10;
     end
-    
+
     dimX = length ( size(x) );
     if length(minDist) ~= dimX
         % In case minimum distance isn't defined for all of x dimensions
         % I use the first value as the default for all of the dimensions
         minDist = minDist( ones(dimX,1) );
     end
-    
+
     % validity checks
     minDist = ceil(minDist);
     minDist = max( [minDist(:)' ; ones(1,length(minDist))] );
@@ -62,17 +62,17 @@ function varargout = localMaximum(x,minDist, exculdeEqualPoints)
         y = sort(x(:));
         dY = diff(y);
         % finding the minimum step in the data
-        minimumDiff = min( dY(dY ~= 0) );   
+        minimumDiff = min( dY(dY ~= 0) );
         %adding noise which won't affect the peaks
         x = x + rand(size(x))*minimumDiff;
     end
     % ---------------------------------------------------------------------
-    
-    
+
+
     se = ones(minDist);
     X = imdilate(x,se);
     f = find(x == X);
-     
+
 
     if nargout
         [varargout{1:nargout}] = ind2sub( size(x), f );

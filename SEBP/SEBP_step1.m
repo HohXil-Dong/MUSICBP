@@ -7,16 +7,11 @@ clear;
 close all;
 
 scriptDir = fileparts(mfilename('fullpath'));
-commonDir = fullfile(scriptDir, 'common');
-funcLibDir = fullfile(scriptDir, 'funcLib');
-addpath(commonDir);
-addpath(genpath(funcLibDir));
-
-cfg = musicbp_config('maduo_2021');
-profile = cfg.active;
+addpath(fullfile(scriptDir, 'common'));
+[cfg, profile, logFile] = musicbp_step_setup(mfilename('fullpath'), mfilename, 'maduo_2021'); %#ok<ASGLU>
 
 musicbp_require(profile.func_lib_dir, 'dir', 'SEBP function library', ...
-    'Please confirm that the funcLib directory is complete.');
+    'Please confirm that the funcLib directory is complete.', logFile);
 
 %% Work to do (do=1, not_do=0)
 Initial_flag = 0;      % Initialize a project
@@ -65,12 +60,6 @@ lonrange = profile.bp.lonrange;
 Band = profile.bp.band;
 
 %% Logging
-if ~isfolder(profile.input_dir)
-    mkdir(profile.input_dir);
-end
-logFile = fullfile(profile.input_dir, 'SEBP_step1.log');
-musicbp_log(logFile, '============================================================');
-musicbp_log(logFile, 'step1 session start');
 musicbp_log(logFile, ...
     'flags: Initial=%d readBP=%d alignpara=%d align=%d bmfm=%d music=%d', ...
     Initial_flag, readBP_flag, alignpara_flag, alignBP_flag, ...
@@ -80,29 +69,43 @@ musicbp_log(logFile, ...
     Band_for_align, ts11, refst, cutoff, inputband, Band);
 
 path = [profile.mainshock_dir filesep];
+stepStartDir = pwd;
+
+if ~isfolder(profile.mainshock_dir)
+    mkdir(profile.mainshock_dir);
+    musicbp_log(logFile, 'INFO', 'created mainshock directory: %s', profile.mainshock_dir);
+end
+if ~isfolder(profile.input_dir)
+    mkdir(profile.input_dir);
+    musicbp_log(logFile, 'INFO', 'created input directory: %s', profile.input_dir);
+end
+if ~isfolder(profile.fig_dir)
+    mkdir(profile.fig_dir);
+    musicbp_log(logFile, 'INFO', 'created figure directory: %s', profile.fig_dir);
+end
 
 if Initial_flag == 1
     fprintf('step1: initializing mainshock project directories.\n');
-    musicbp_log(logFile, 'initializing project directories under %s', profile.mainshock_dir);
+    musicbp_log(logFile, 'INFO', 'initializing project directories under %s', profile.mainshock_dir);
     initialize_BP(profile.root_dir, workPath, project);
 end
 
 if readBP_flag == 1
     fprintf('step1: reading mainshock SAC data.\n');
-    musicbp_log(logFile, 'reading mainshock SAC data from %s', profile.data_dir);
+    musicbp_log(logFile, 'INFO', 'reading mainshock SAC data from %s', profile.data_dir);
 
     Preshift = false;
-    musicbp_require(profile.data_dir, 'dir', 'mainshock data directory', ...
-        'Please place SAC files under SEBP/mainshock/Data.');
-    musicbp_write_filelist(profile.data_dir);
-    musicbp_log(logFile, 'wrote filelist under %s', profile.data_dir);
+    musicbp_prepare_data_dir(profile.data_dir, logFile);
 
-    readteleBP(path, lon0, lat0, sr, ori, displayLength, Preshift, plotscale, strike1, strike2, Mw);
+    readteleBP(path, lon0, lat0, sr, ori, displayLength, Preshift, plotscale, ...
+        strike1, strike2, Mw, logFile);
     check_data(path, 1);
 
     data0 = load(fullfile(profile.input_dir, 'data0.mat'), 'ret');
     ret = data0.ret;
-    musicbp_log(logFile, 'data0.mat created with %d stations', size(ret.xori, 1));
+    readStationCount = size(ret.xori, 1);
+    fprintf('step1: readBP kept %d stations after distance filtering.\n', readStationCount);
+    musicbp_log(logFile, 'INFO', 'data0.mat created with %d stations', readStationCount);
 
     ret.x = ret.xori;
     fl = 0.1;
@@ -117,8 +120,17 @@ if readBP_flag == 1
     ret.x(:, 1:200) = 0;
     ret.x(:, 3000:end) = 0;
     ret.scale = 0.5;
-    figure;
+    hReadPreview = figure('Name', 'mainshock - data0 read preview', 'NumberTitle', 'off');
     plotAll1(ret);
+    figure(hReadPreview);
+    drawnow;
+    pause(0.05);
+    drawnow;
+    print(hReadPreview, fullfile(profile.fig_dir, 'data0_read_preview.png'), '-dpng', '-r200');
+    figure(hReadPreview);
+    drawnow;
+    pause(0.05);
+    drawnow;
 end
 
 if alignpara_flag == 1
@@ -134,9 +146,7 @@ if alignpara_flag == 1
         requiredHint = 'Please finish the previous manual alignment pass first.';
     end
 
-    musicbp_require(requiredInput, 'file', requiredLabel, requiredHint);
-    fprintf('step1: current manual settings ts11=%.3f, refst=%d, cutoff=%.3f.\n', ...
-        ts11, refst, cutoff);
+    musicbp_require(requiredInput, 'file', requiredLabel, requiredHint, logFile);
     musicbp_log(logFile, ...
         'alignpara band %d using %s with manual ts11=%.3f refst=%d cutoff=%.3f', ...
         Band_for_align, requiredLabel, ts11, refst, cutoff);
@@ -165,7 +175,7 @@ if alignBP_flag == 1
         requiredHint = 'Please finish the previous manual alignment pass first.';
     end
 
-    musicbp_require(requiredInput, 'file', requiredLabel, requiredHint);
+    musicbp_require(requiredInput, 'file', requiredLabel, requiredHint, logFile);
     inputData = load(requiredInput, 'ret');
     inputRet = inputData.ret;
     inputStations = size(inputRet.xori, 1);
@@ -176,26 +186,21 @@ if alignBP_flag == 1
         refLat = inputRet.lat(refst);
         refSummary = sprintf('station %d (%s, lon=%.3f, lat=%.3f)', ...
             refst, refName, refLon, refLat);
-        fprintf(['step1: alignment parameters ts11=%.3f, refst=%d ' ...
-            '(%s, lon=%.3f, lat=%.3f), cutoff=%.3f.\n'], ...
-            ts11, refst, refName, refLon, refLat, cutoff);
     else
         refSummary = 'stacked trace';
-        fprintf('step1: alignment parameters ts11=%.3f, refst=0 (stacked trace), cutoff=%.3f.\n', ...
-            ts11, cutoff);
     end
 
     musicbp_log(logFile, ...
         'align band %d using %s: input_stations=%d ts11=%.3f refst=%d cutoff=%.3f reference=%s', ...
         Band_for_align, requiredLabel, inputStations, ts11, refst, cutoff, refSummary);
 
-    align_BP(path, Band_for_align, ts11, refst, cutoff, plotscale);
+    align_BP(path, Band_for_align, ts11, refst, cutoff, plotscale, logFile);
 
     outputData = load(fullfile(profile.input_dir, sprintf('data%d.mat', Band_for_align)), 'ret');
     ret = outputData.ret;
     outputStations = size(ret.xori, 1);
-    fprintf('step1: alignment finished for band %d, stations kept %d/%d.\n', ...
-        Band_for_align, outputStations, inputStations);
+    fprintf('step1: align band %d kept %d/%d stations after cutoff %.2f.\n', ...
+        Band_for_align, outputStations, inputStations, cutoff);
     musicbp_log(logFile, ...
         'alignment finished for band %d: stations kept %d/%d', ...
         Band_for_align, outputStations, inputStations);
@@ -213,46 +218,70 @@ if alignBP_flag == 1
     ret.x(:, 1:200) = 0;
     ret.x(:, 3000:end) = 0;
     ret.scale = 0.1;
-    figure;
+    hAlignPreview = figure( ...
+        'Name', sprintf('mainshock - data%d align preview', Band_for_align), ...
+        'NumberTitle', 'off');
     plotAll1(ret);
+    figure(hAlignPreview);
+    drawnow;
+    pause(0.05);
+    drawnow;
+    print(hAlignPreview, ...
+        fullfile(profile.fig_dir, sprintf('data%d_align_preview.png', Band_for_align)), ...
+        '-dpng', '-r200');
+    figure(hAlignPreview);
+    drawnow;
+    pause(0.05);
+    drawnow;
 end
 
 if runBPbmfm_flag == 1
     fprintf('step1: running beamforming BP.\n');
     musicbp_require(profile.ptimesdepth_file, 'file', 'Ptimesdepth.mat', ...
-        'Please confirm that the travel-time table exists in SEBP/funcLib/libBP.');
+        'Please confirm that the travel-time table exists in SEBP/funcLib/libBP.', logFile);
     musicbp_require(fullfile(profile.input_dir, sprintf('data%d.mat', inputband)), ...
         'file', sprintf('data%d.mat', inputband), ...
-        'Please finish the mainshock alignment step first.');
+        'Please finish the mainshock alignment step first.', logFile);
 
-    BPfile = setparBP(path, inputband, Band, lon0, lat0, dep, parr, over, ps, qs, lonrange, latrange);
+    BPfile = setparBP(path, inputband, Band, lon0, lat0, dep, parr, over, ps, qs, lonrange, latrange, ...
+        profile.bp.win);
     bpInfo = load(BPfile, 'ret');
     outputDir = fullfile(profile.input_dir, [bpInfo.ret.dirname '_bmfm_Dir']);
     musicbp_log(logFile, 'running beamforming BP with parameter file %s', BPfile);
     musicbp_log(logFile, 'beamforming output directory: %s', outputDir);
 
-    runteleBPbmfm(path, BPfile);
+    runteleBPbmfm(path, BPfile, logFile);
+    musicbp_require(fullfile(outputDir, 'parret.mat'), 'file', 'beamforming parret.mat', ...
+        'Beamforming BP did not produce the expected output directory contents.', logFile);
+    cd(outputDir);
     posteriorBPbmfm;
+    cd(stepStartDir);
     musicbp_log(logFile, 'beamforming BP finished for %s', bpInfo.ret.dirname);
-    close all;
 end
 
 if runBPmusic_flag == 1
     fprintf('step1: running MUSIC BP.\n');
     musicbp_require(profile.ptimesdepth_file, 'file', 'Ptimesdepth.mat', ...
-        'Please confirm that the travel-time table exists in SEBP/funcLib/libBP.');
+        'Please confirm that the travel-time table exists in SEBP/funcLib/libBP.', logFile);
     musicbp_require(fullfile(profile.input_dir, sprintf('data%d.mat', inputband)), ...
         'file', sprintf('data%d.mat', inputband), ...
-        'Please finish the mainshock alignment step first.');
+        'Please finish the mainshock alignment step first.', logFile);
 
-    BPfile = setparBP(path, inputband, Band, lon0, lat0, dep, parr, over, ps, qs, lonrange, latrange);
+    BPfile = setparBP(path, inputband, Band, lon0, lat0, dep, parr, over, ps, qs, lonrange, latrange, ...
+        profile.bp.win);
     bpInfo = load(BPfile, 'ret');
     outputDir = fullfile(profile.input_dir, [bpInfo.ret.dirname '_MUSIC_Dir']);
     musicbp_log(logFile, 'running MUSIC BP with parameter file %s', BPfile);
     musicbp_log(logFile, 'MUSIC output directory: %s', outputDir);
 
-    runteleBPmusic(path, BPfile);
+    runteleBPmusic(path, BPfile, logFile);
+    musicbp_require(fullfile(outputDir, 'parret.mat'), 'file', 'MUSIC parret.mat', ...
+        'MUSIC BP did not produce the expected output directory contents.', logFile);
+    cd(outputDir);
     posteriorBPmusic;
+    cd(stepStartDir);
     musicbp_log(logFile, 'MUSIC BP finished for %s', bpInfo.ret.dirname);
-    close all;
 end
+
+fprintf('step1: finished.\n');
+musicbp_log(logFile, 'INFO', 'step1 session end');

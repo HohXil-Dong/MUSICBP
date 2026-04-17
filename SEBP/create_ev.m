@@ -1,6 +1,6 @@
 % CREATE_EV
 % Maintain the aftershock event list for the standalone SEBP workflow.
-% Event directories should be located directly under the SEBP root.
+% Event directories should be located under SEBP/aftershock/.
 
 scriptDir = fileparts(mfilename('fullpath'));
 

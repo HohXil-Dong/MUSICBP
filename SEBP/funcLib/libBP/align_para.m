@@ -7,7 +7,7 @@ end
 
 filename = strcat(path, 'Input/data', num2str(Band - 1));
 load(filename);
-[fl, fh, win, range] = alignband(Band);
+[fl, fh, win, range] = alignband(Band, true);
 
 ret.x = ret.xori;
 load ptimes;

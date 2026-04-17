@@ -24,7 +24,7 @@ stanm=ret.nm;
 
 
 hold on;
-% 
+%
 % plot(lon,lat,'r*');
 plot(lon0,lat0,'r*','MarkerSize',20);
 plot( r(:,1), r(:,2),stacolor,'MarkerSize',20);

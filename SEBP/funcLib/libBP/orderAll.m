@@ -1,88 +1,84 @@
-function ret=orderAll(ret,dist0,ind)
-if dist0==0
-    B=ind;
-    
+function ret = orderAll(ret, dist0, ind)
+if dist0 == 0
+    B = ind;
+
 else
-    if nargin<3% no opr speciified, use default
-        ind=1:length(dist0);
+    if nargin < 3 % no opr speciified, use default
+        ind = 1:length(dist0);
     end
-    
-    tmp=sortrows([ind dist0(ind)],2);
-    
-    B=tmp(:,1);
+
+    tmp = sortrows([ind dist0(ind)], 2);
+
+    B = tmp(:, 1);
 end
-ret.n=length(B);
-size(B)
-B(end)
+ret.n = length(B);
 if isfield(ret,'x')
-ret.x=ret.x(B,:);
+ret.x = ret.x(B,:);
 end
 if isfield(ret,'xori')
-ret.xori=ret.xori(B,:);
+ret.xori = ret.xori(B,:);
 end
 if isfield(ret,'EWori')
-ret.EWori=ret.EWori(B,:);
+ret.EWori = ret.EWori(B,:);
 end
 if isfield(ret,'NSori')
-ret.NSori=ret.NSori(B,:);
+ret.NSori = ret.NSori(B,:);
 end
 if isfield(ret,'UDori')
-ret.UDori=ret.UDori(B,:);
+ret.UDori = ret.UDori(B,:);
 end
 if isfield(ret,'utmzone')
-ret.utmzone=ret.utmzone(B,:);
+ret.utmzone = ret.utmzone(B,:);
 end
 
 if isfield(ret,'r')
-ret.r=ret.r(B,:);
+ret.r = ret.r(B,:);
 end
 if isfield(ret,'nm')
-ret.nm=ret.nm(B,:);
+ret.nm = ret.nm(B,:);
 end
 if isfield(ret,'mf')
-ret.mf=ret.mf(:,B);
+ret.mf = ret.mf(:, B);
 end
 if isfield(ret,'wnorm')
-ret.wnorm=ret.wnorm(B);
+ret.wnorm = ret.wnorm(B);
 end
 if isfield(ret,'lat')
-ret.lat=ret.lat(B);
+ret.lat = ret.lat(B);
 end
 if isfield(ret,'lon')
-ret.lon=ret.lon(B);
+ret.lon = ret.lon(B);
 end
 if isfield(ret,'rdis')
-ret.rdis=ret.rdis(B);
+ret.rdis = ret.rdis(B);
 end
 if isfield(ret,'az')
-ret.az=ret.az(B);
+ret.az = ret.az(B);
 end
 % if isfield(ret,'time')
 % ret.time=ret.time(B,:);
 % end
 if isfield(ret,'recordtime')
-ret.recordtime=ret.recordtime(B);
+ret.recordtime = ret.recordtime(B);
 end
 if isfield(ret,'recordtimesec')
-ret.recordtimesec=ret.recordtimesec(B);
+ret.recordtimesec = ret.recordtimesec(B);
 end
 if isfield(ret,'t1')
-ret.t1=ret.t1(B);
+ret.t1 = ret.t1(B);
 end
 if isfield(ret,'x1')
-    ret.x1=ret.x1(B,:);
+    ret.x1 = ret.x1(B,:);
 end
 if isfield(ret,'timeshift')
-    ret.timeshift=ret.timeshift(B);
+    ret.timeshift = ret.timeshift(B);
 end
 if isfield(ret,'ds')
-    ret.ds=ret.ds(B);
+    ret.ds = ret.ds(B);
 end
 if isfield(ret,'timeshiftall')
-    ret.timeshiftall=ret.timeshiftall(B);
+    ret.timeshiftall = ret.timeshiftall(B);
 end
 if isfield(ret,'nf')
-    ret.nf=ret.nf(B);
+    ret.nf = ret.nf(B);
 end
-
-    

@@ -1,4 +1,4 @@
-% USAGE: after download, rdseed all events, and remove instrument response 
+% USAGE: after download, rdseed all events, and remove instrument response
 %        in mother_loc, this script will:
 %           1. automatically read all .SAC files for each event.
 %           2. correct recordtime (same as bbeu001)
@@ -28,7 +28,7 @@ dep0   = 20;
     load('Input/data0.mat')
 
       % Delete stations with hypocenter dist larger than 90
-        iin=find(ret.rdis<91);   
+        iin=find(ret.rdis<91);
         ret=orderAll(ret,0,iin);
 
       % Calculate travel time
@@ -36,17 +36,17 @@ dep0   = 20;
         travel_time = interp2(dis,dep,Ptt,ret.rdis,dep0,'linear',0);
 
         correct_recordtime = origin_time + (travel_time-ori)/3600/24;
-        
+
         %% Local time correction
-        % Need to correct ret.recordtime first 
+        % Need to correct ret.recordtime first
         % based just on Japan local time difference: UTC+0900.
         ret.recordtime = ret.recordtime - 9.0/24;
-        
+
         %% time correction based on P-arrival removal
-        time_correction = correct_recordtime - (ret.recordtime-1); 
+        time_correction = correct_recordtime - (ret.recordtime-1);
         time_correction = time_correction*3600*24; % from datenum to seconds
       % Now it's time to shift the seismogram with respect to time_correction
-        for j = 1:length(ret.lon) 
+        for j = 1:length(ret.lon)
             ret.xori(j,:) = specshift(ret.xori(j,:),time_correction(j)*ret.sr);
             ret.x(j,:)    = specshift(ret.x(j,:),   time_correction(j)*ret.sr);
         end
@@ -54,8 +54,8 @@ dep0   = 20;
       % Also we need to correct ret.recordtime and recordtimesec
         ret.recordtime = correct_recordtime;
         ret.recordtimesec = (ret.recordtime - ret.recordtime(1)) * 24 * 3600;
-    
+
     % Save ret
       save Input/data0 ret
       plotAll1(ret)
-    
+

@@ -1,12 +1,23 @@
-% This script will be used to do everything after runteleBP, i.e. movieBP 
+% This script will be used to do everything after runteleBP, i.e. movieBP
 % and summaryBP, by that it will pick the peak (radiator) for each second,
 % and generate HFdots file. You will need to finish runteleBP or
 % runteleBPmusic or runteleBPmusicCali first, then run this script.
-% Note: The script does not plot the movie and only create HFdots.
+% Note: The script still opens plotting windows while saving outputs.
 
 %clear all;
 %close all;
 load parret.mat;
+
+currentResultDir = pwd;
+currentResultDir = regexprep(currentResultDir, [filesep '$'], '');
+currentResultName = regexprep(currentResultDir, ['^.*\' filesep], '');
+eventDir = fileparts(fileparts(currentResultDir));
+figDir = fullfile(eventDir, 'Fig');
+if ~isfolder(figDir)
+    mkdir(figDir);
+end
+movieGifFile = fullfile(figDir, [currentResultName '_movie.gif']);
+powerTimeFile = fullfile(figDir, [currentResultName '_PowerTime.png']);
 
 %% load parameter from parret.mat (ret)  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     lon0=ret.lon0;          % lon of mainshock
@@ -20,12 +31,12 @@ load parret.mat;
     uxRange=ret.latrange;   % range of latitude
     uyRange=ret.lonrange;   % range of longitude
 %% Some other pre-set  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    ncontour=200;           
+    ncontour=200;
     load worldcoast.dat;
     load asiapolitical;
     t=1:step:tend;          % time
     Pm=zeros(ps,qs);        % MUSIC power
-    ux=linspace(uxRange(1)+lat0,uxRange(2)+lat0,ps); % lat of grid points in source area   
+    ux=linspace(uxRange(1)+lat0,uxRange(2)+lat0,ps); % lat of grid points in source area
     uy=linspace(uyRange(1)+lon0,uyRange(2)+lon0,qs); % lon of grid points in source area
     bux=zeros(length(t),10);                         % bux will be the lat of peaks
     buy=zeros(length(t),10);                         % buy will be the lon of peaks
@@ -36,10 +47,10 @@ load parret.mat;
     y1=zeros(length(t),2);          % y1 will be the lon of the man_pick peak(s)
 
 %% Pre-process of 0smat.mat (build up the loop of GIF, and plot 0s movie)
-    h=figure(2);
-    set(gcf,'Position',[100 1000 200*(uyRange(2)-uyRange(1)) 200*(uxRange(2)-uxRange(1))]);
+    h=figure('Name', [currentResultName ' movie'], 'NumberTitle', 'off');
+    set(h,'Position',[100 1000 200*(uyRange(2)-uyRange(1)) 200*(uxRange(2)-uxRange(1))]);
     hold on;
-    
+
     %%%%%%%%%%%%%% plot 0s movie and build up the loop of GIF %%%%%%%%%%%%%
     load('0smat.mat');
     [c,ch]=contourf(uy,ux,real(Pm)/20,ncontour); % Plot the MUSIC power (Pm)
@@ -48,14 +59,14 @@ load parret.mat;
     colormap(jet);
     colorbar;
     xlabel('^oE');
-	ylabel('^oN');
-    chsize(20) % set FontSize of Label and Title
+    ylabel('^oN');
+    chsize(20); % set FontSize of Label and Title
     drawnow;
 
     f = getframe(h);
     [im,map] = rgb2ind(f.cdata,256,'nodither');
-    clf;    % clean current figure. 
-    imwrite(im,map,'movie.gif','DelayTime',0.50,'LoopCount',inf)
+    clf;    % clean current figure.
+    imwrite(im,map,movieGifFile,'DelayTime',0.50,'LoopCount',inf);
     kt=0;   % Name-value pair 'LoopCount',Inf causes the animation to continuously loop.
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% END %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -63,37 +74,37 @@ load parret.mat;
 %% Process every second after 0s
 for j=1:length(t)
     kt=kt+1;
-    
+
     hold on;
     title([num2str(t(j)) 's']);
     load( [num2str(t(j)) 'smat.mat']);  % loat 't'smat.mat
-    
+
     Pm=abs(real(Pm));
     Pm=Pm-min(Pm(:));   % MUSIC Power (Pm)
 
-	%% Pick 'localMaximum' than use 'sortrows' to sort peaks with decreasing Pm
+    %% Pick 'localMaximum' than use 'sortrows' to sort peaks with decreasing Pm
         [pw,qw]=localMaximum(abs(Pm),[2 2]); % pw,qw: index of lon/lat of peaks
         clear tmp;
         for jj=1:length(pw)
             tmp(jj)=abs(Pm(pw(jj),qw(jj)));
         end
         %%%%%%%%%%% Sort peaks with the deceasing energy (tmp) %%%%%%%%%%%%
-        ttmp=sortrows([pw qw tmp'],-3); % 
+        ttmp=sortrows([pw qw tmp'],-3); %
         pw=ttmp(:,1);
         qw=ttmp(:,2);
         tmp=ttmp(:,3);
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% END %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
         %%%%%%%% DETERMINE if peak(jj) is too small (<0.5*tmp(1)) %%%%%%%%%
-        nw(kt)=min([ 3 length(tmp) ]);% nw will be the number of peaks 
-        for jj=1:nw(kt)         
+        nw(kt)=min([ 3 length(tmp) ]);% nw will be the number of peaks
+        for jj=1:nw(kt)
             if tmp(jj)<0.5*tmp(1)   % note that tmp(1) is the max power at this time
                 nw(kt)=jj-1;        % if so, than delete it, as we decrease nw.
                 break;              % nw is the number of peaks
             end
         end
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% END %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        
+
         %%%%%%%%%%%%%% Value Assignment of lat/lon of peaks %%%%%%%%%%%%%%%
         bux(kt,1:nw(kt)) = interp1(1:length(ux),ux,pw(1:nw(kt)));
         buy(kt,1:nw(kt)) = interp1(1:length(uy),uy,qw(1:nw(kt)));
@@ -108,23 +119,23 @@ for j=1:length(t)
         colorbar;
         xlabel('^oE');
         ylabel('^oN');
-        chsize(20) % set FontSize of Label and Title
+        chsize(20); % set FontSize of Label and Title
         drawnow;
-        
+
         plot(lon0,lat0,'r*','MarkerSize',10);   % plot the Epicenter
         text(lon0,lat0,'\leftarrow Epicenter','Color','red');
         for jj=1:nw(kt)
-            text(buy(kt,jj),bux(kt,jj),num2str(jj),'Color','cyan','HorizontalAlignment','center')
+            text(buy(kt,jj),bux(kt,jj),num2str(jj),'Color','cyan','HorizontalAlignment','center');
         end
-        
+
     %% Save every second images into a GIF file. %%%%%%%%%%%%%%%%%%%%%%%%%%
     f=getframe(h);
     im= rgb2ind(f.cdata,map,'nodither');
-    clf
-    imwrite(im,map,'movie.gif','DelayTime',0.5,'WriteMode','append') 
+    clf;
+    imwrite(im,map,movieGifFile,'DelayTime',0.5,'WriteMode','append');
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 end
- save movieBP;
+save('movieBP.mat','bux','buy','Power','nw','x1','y1','t','-v7.3');
 
 %% Write HFdots file
 Power = sqrt(Power); % the square root of amplitude
@@ -132,7 +143,7 @@ Power = Power / max(Power(:));
 
 load ptimes;
 for j=1:length(t)
-    sd=phtime(1,lat0,lon0,bux(j,1),buy(j,1),ret.r(:,2),ret.r(:,1),rr,tt)'; 
+    sd=phtime(1,lat0,lon0,bux(j,1),buy(j,1),ret.r(:,2),ret.r(:,1),rr,tt)';
     t(j)=t(j)-mean(sd);
 end
 
@@ -154,7 +165,7 @@ save('HFdots','x3','-ascii'); % generate the HFdots file
 % r1=interp1(1:tend,r,t);
 % g1=interp1(1:tend,g,t);
 % b1=interp1(1:tend,b,t);
-% 
+%
 % kt=0;
 % for j=1:length(t)
 %     kt=kt+1;
@@ -174,7 +185,13 @@ save('HFdots','x3','-ascii'); % generate the HFdots file
 % xlabel('Longitude (^o)');
 % ylabel('Latitude (^o)');
 % box on;
-% print('-dpdf','-r300','summaryBP.pdf'); 
-% 
-     %% Plot Power-time
-     figure;plot(real(Power(:,1)) )
+%
+%% Plot Power-time
+hPower = figure('Name', [currentResultName ' power-time'], 'NumberTitle', 'off');
+plot(real(Power(:,1)));
+box on;
+xlabel('Time (s)');
+ylabel('Normalized Power');
+title('Power vs time');
+drawnow;
+print(hPower, powerTimeFile, '-dpng', '-r300');

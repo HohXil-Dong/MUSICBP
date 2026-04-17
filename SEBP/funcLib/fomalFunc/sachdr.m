@@ -1,6 +1,6 @@
 function [SACdata]=sachdr(head1, head2, head3)
 %function [SACdata]=sachdr(head1, head2, head3)
-% Read from the output header of one single SAC format file and generate 
+% Read from the output header of one single SAC format file and generate
 % the SACdata structure array contains the following elements:
 %    times
 %    station
@@ -14,9 +14,9 @@ function [SACdata]=sachdr(head1, head2, head3)
 
 %Most of these elements are themselves structures and their members
 %are as follows:
-%times	station	event	user	 descrip  evsta	llnl		data	
+%times	station	event	user	 descrip  evsta	llnl		data
 %-----	-------	-----	------   -------  -----	----		----
-%delta	stla	evla	data(10) iftype   dist	xminimum	trcLen	
+%delta	stla	evla	data(10) iftype   dist	xminimum	trcLen
 %b	stlo	evlo	label(3) idep     az	xmaximum	scale
 %e	stel	evel		 iztype   baz	yminimum
 %o	stdp	evdp		 iinst    gcarc	ymaximum
@@ -45,11 +45,11 @@ function [SACdata]=sachdr(head1, head2, head3)
 %kt9
 %kf
 
-%response is a 10-element array, and trcLen is a scalar. Thus, to 
+%response is a 10-element array, and trcLen is a scalar. Thus, to
 %reference the begin time you would write:
-%SACdata.times.b 
+%SACdata.times.b
 
-% Note: The above data structure is copied from the SAC2000 mat 
+% Note: The above data structure is copied from the SAC2000 mat
 % reference.
 
 % Function called: sac.m
@@ -60,7 +60,7 @@ function [SACdata]=sachdr(head1, head2, head3)
 
 % SACdata.times
 
-      SACdata.times.delta   = head1(1,1); 
+      SACdata.times.delta   = head1(1,1);
       SACdata.times.b   = head1(2,1);
       SACdata.times.e   = head1(2,2);
       SACdata.times.o   = head1(2,3);

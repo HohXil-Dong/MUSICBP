@@ -26,7 +26,7 @@ minx=lon0+uyRange(1);
 maxx=lon0+uyRange(2);
 miny=lat0+uxRange(1);
 maxy=lat0+uxRange(2);
-ProjectionScale=5; 
+ProjectionScale=5;
 
 RVALUE=string(minx)+'/'+maxx+'/'+miny+'/'+maxy;
 JVALUE="m"+ProjectionScale+"c";
