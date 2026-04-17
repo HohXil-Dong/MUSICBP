@@ -17,7 +17,7 @@ else
     plotcolor='b';
 end
 for i=1:n
-    
+
 plot(t,x(i,1:m)*ret.scale+ploty(i),plotcolor);
 xlabel('Time (s)');
 ylabel('Station Index');

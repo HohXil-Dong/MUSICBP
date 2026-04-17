@@ -1,12 +1,12 @@
 % The Multiple Signal Classification (MUSIC) technique
 %is a high-resolution technique designed
-%to resolve closely spaced simultaneous sources. 
+%to resolve closely spaced simultaneous sources.
 %MUSIC enables back-projection imaging (BP)
 %with superior resolution than the standard Beamforming techinque.
 %MUSICBP is a tutorial code in Matlab
-%that images the spatial-temporal evolution of high-frequency radiators 
+%that images the spatial-temporal evolution of high-frequency radiators
 %(as a proxy of rupture front) for large earthquakes.
-% You can modify simulation parameters in parts of the code 
+% You can modify simulation parameters in parts of the code
 % that have comments starting as: "**** Set here ..."
 % September 3, 2019
 % Lingsen Meng (meng@epss.ucla.edu) and Han Bao (hbrandon@ucla.edu)
@@ -23,11 +23,11 @@ runBPmusic_flag=1;  % MUSIC Back-Projection
 
 %% *** Set here the parameters to initialize the project and read the SAC files***
 project = 'Palu_2018'; % name of the project
-lon0=119.840;      	% hypocenter longitude
-lat0=-0.178;      	% hypocenter latitude
-dep=10.0;       	% hypocenter depth
-Mw=7.5;            	% magnitude
-sr=10;            	% sampling rate in Hz
+lon0=119.840;          % hypocenter longitude
+lat0=-0.178;          % hypocenter latitude
+dep=10.0;           % hypocenter depth
+Mw=7.5;                % magnitude
+sr=10;                % sampling rate in Hz
 ori=60;              % length of seismograms before P-arrival
 displayLength=360;   % length of waveforms to display
 plotScale=1.5;       % amplitude scaling factor
@@ -66,7 +66,7 @@ if Initial_flag==1
     initialize_BP(scriptDir, workPath, project);
 end
 if readBP_flag==1
-	fprintf('Reading seismograms\n');
+    fprintf('Reading seismograms\n');
     Preshift=false; % no change!
     if ~isfolder(inputDir)
         mkdir(inputDir);

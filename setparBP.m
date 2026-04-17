@@ -1,16 +1,16 @@
 function [filename]=setparBP(path,inputband,Band,lon0,lat0,dep,parr,over,ps,qs,lonrange,latrange)
 % setparBP set parameters for runteleBP/runteleBPmusic/runteleBPmusicCali
-%   
+%
 %   explaination of the inputs:
-%   	path:     	the working address of current project or event, 
+%       path:         the working address of current project or event,
 %                       e.g. /home/USER/BackProjection/Mexico2017.
-%    	Band:           
-%     	ts11:     	P arrival time since the straight one (records)
+%        Band:
+%         ts11:         P arrival time since the straight one (records)
 %                       i.e. how long the data start before P-arrival time
-%     	refst:   	
-%       cutoff:     
+%         refst:
+%       cutoff:
 %       plotscale:  scaling of the amplitudes of seismograms
-%   
+%
 
 %   Copyright 2013-2017 Han Bao & Lingsen Meng's group, UCLA.
 

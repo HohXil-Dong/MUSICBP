@@ -4,16 +4,16 @@ function readteleBP(path,lon0,lat0,sr,ori,display,Preshift,plotscale)
 %   readteleBP(path,lon0,lat0,sr,display,Preshift) read .SAC files that
 %   restored in path/Data. 'path' is the working address of current project
 %   or event, e.g. /home/USER/BackProjection/Mexico2017.
-%   
+%
 %   explaination of the inputs:
-%   	path:           the working address of current project or event, 
+%       path:           the working address of current project or event,
 %                         e.g. /home/USER/BackProjection/Mexico2017.
-%    	(lon0,lat0):    the epicenter location of the current event
-%     	sr:             is sample rate.
-%       
-%     	display:        time length of waveform showing by plotAll1(ret)
-%       plotscale:    	scaling of the amplitudes of seismograms
-% 
+%        (lon0,lat0):    the epicenter location of the current event
+%         sr:             is sample rate.
+%
+%         display:        time length of waveform showing by plotAll1(ret)
+%       plotscale:        scaling of the amplitudes of seismograms
+%
 %
 %   Copyright 2013-2017 Han Bao & Lingsen Meng's group, UCLA.
 
@@ -25,7 +25,7 @@ opr.lat0=lat0;
 opr.bp=[0.01 2];
 opr.snrFilterbool=false;
 opr.snrFilter=[0.1 0.1 2 -20 -10 100 130];
-opr.sr=sr; 
+opr.sr=sr;
 opr.ori=ori;
 datalog=strcat(path,'Data/');
 ret=readAllSac(datalog,opr);

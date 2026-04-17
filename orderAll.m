@@ -1,19 +1,17 @@
 function ret=orderAll(ret,dist0,ind)
 if dist0==0
     B=ind;
-    
+
 else
     if nargin<3% no opr speciified, use default
         ind=1:length(dist0);
     end
-    
+
     tmp=sortrows([ind dist0(ind)],2);
-    
+
     B=tmp(:,1);
 end
 ret.n=length(B);
-size(B);
-B(end);
 
 if isfield(ret,'x')
 ret.x=ret.x(B,:);
@@ -88,4 +86,4 @@ if isfield(ret,'nf')
     ret.nf=ret.nf(B);
 end
 
-    
+

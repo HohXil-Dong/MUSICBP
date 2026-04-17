@@ -1,8 +1,8 @@
 function P = peakfit2d(Z)
-% Find sub-sample location of a global peak within 2D-matrix by applying 
-% two dimensional polynomial fit & extremum detection. 
+% Find sub-sample location of a global peak within 2D-matrix by applying
+% two dimensional polynomial fit & extremum detection.
 %
-% Sample usage: 
+% Sample usage:
 % >> M = exp(-((1:30) - 19.5).^2/(2*5^2)); % gauss: center=19.5; sigma=5
 % >> P = peakfit2d(M'*M);                  % find peak in 2D-gauss
 % >> disp(P);
@@ -10,7 +10,7 @@ function P = peakfit2d(Z)
 %
 % Algebraic solution derived with the following steps:
 %
-% 0.) Define Approximation-Function: 
+% 0.) Define Approximation-Function:
 %
 %     F(x,y) => z = a*x^2+b*x*y+c*x+d+e*y^2+f*y
 %
@@ -21,7 +21,7 @@ function P = peakfit2d(Z)
 %     SSD = [ a*(-1)^2+b*(-1)*(-1)+c*(-1)+d+e*(-1)^2+f*(-1) - Z(-1,-1) ]^2 + ...
 %              ...
 %             a*(+1)^2+b*(+1)*(+1)+c*(+1)+d+e*(+1)^2+f*(+1) - Z(-1,-1) ]^2
-%        
+%
 % 2.) Differentiate SSD towards each parameter
 %
 %     dSSD / da = ...
@@ -48,7 +48,7 @@ end
 
 % find global maximum and extract 9-point neighbourship
 [v,p] = max(Z(:));
-[yp,xp]=ind2sub(sZ,p); 
+[yp,xp]=ind2sub(sZ,p);
 if (yp==1)||(yp==sZ(1))||(xp==1)||(xp==sZ(2))
     disp('Maximum position at matrix border. No subsample approximation possible.');
     P = [yp xp];
